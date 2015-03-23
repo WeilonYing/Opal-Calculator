@@ -15,6 +15,7 @@
  
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -26,7 +27,7 @@
 #define CONCESSION_HALF_PRICE 0.5
 
 /* BEGIN DECLARATION OF FUNCTIONS */
-int getFinalCost (void);
+float getFinalCost (void);
 int getConcessionStatus (void);
 /* END DECLARATION OF FUNCTIONS */
 
@@ -45,14 +46,14 @@ float getFinalCost (void) {
     
     //Initialise calculation variables
     int concessionStatus = NOT_CONCESSION; //Initialise as 0, so 
-    int isSunday = FALSE;
-    int basicCost = 0;
+    //int isSunday = FALSE;
+    //int basicCost = 0;
     
     //get value of concessionStatus variable
     concessionStatus = getConcessionStatus();
     
 	finalCost = 10; //temporary setting to test main function.
-    if (concessionStatus >= NOT_CONCESSION) {
+    if (concessionStatus > NOT_CONCESSION) {
         finalCost = finalCost * CONCESSION_HALF_PRICE;
     }
     
@@ -70,8 +71,8 @@ int getConcessionStatus (void) {
     
     scanf ("%d", &inputConcessionStatus);
     
-    assert (inputConcessionStatus >= NOT_CONCESSION
-        && inputConcessionStatus <= PENSIONER_CONCESSION);
+    assert (inputConcessionStatus >= NOT_CONCESSION);
+    assert (inputConcessionStatus <= PENSIONER_CONCESSION);
     
     return inputConcessionStatus;
 }
