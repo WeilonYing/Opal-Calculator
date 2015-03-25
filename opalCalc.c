@@ -27,6 +27,11 @@
 #define OFF_PEAK_DISCOUNT 0.7;
 #define CONCESSION_HALF_PRICE 0.5
 
+#define STANDARD_DAILY_CAP 15.00
+#define CONCESSION_DAILY_CAP 7.50
+#define PENSIONER_DAILY_CAP 2.50
+#define SUNDAY_CAP 2.50
+
 #define TRAIN 0
 #define BUS 1
 #define FERRY 2
@@ -86,10 +91,9 @@ int main (int argc, char * argv[]) {
    return EXIT_SUCCESS;
 }
 
-float getFinalCost (void) {
-    //Initialise return variable
-    
-	float finalCost = 0; //Initialise final cost variable
+float getFinalCost (void) { //Master function
+	float finalCost = 0; //Initialise final cost (return) variable
+    ]
     //Initialise calculation variables
     int concessionStatus = NOT_CONCESSION; //Initialise as 0, to minimise error risk.
     int isSunday = FALSE; //Initialise as 0 to minimise error risk.
@@ -107,10 +111,7 @@ float getFinalCost (void) {
 	finalCost = 10; //temporary setting to test main function.
     
     finalCost = calculateFinalCost (basicCost);
-    if (concessionStatus > NOT_CONCESSION) {
-        finalCost = finalCost * CONCESSION_HALF_PRICE;
-    }
-    
+
 	return finalCost;
 }
 
@@ -305,12 +306,36 @@ float calculateCost (int transportMode, int travelDist, int isOffPeak) {
 }
 
 float calculateFinalCost (float basicCost, int concessionStatus, int isSunday) {
+    //Normal concession discount test
     if (concessionStatus > NOT_CONCESSION) {
         basicCost = basicCost * CONCESSION_HALF_PRICE;
     }
-    else {
-        
+
+    //Daily cap test
+    if (concessionStatus > NOT_CONCESSION) {
+        if (concessionStatus == PENSIONER_CONCESSION) {
+            if (basicCost > PENSIONER_DAILY_CAP) {
+                basicCost = PENSIONER_DAILY_CAP;
+            }
+        } else {
+            if (basicCost > CONCESSION_DAILY_CAP) {
+                basicCost = CONCESSION_DAILY_CAP;
+            }
+        }
+    } else {
+        if (basicCost > STANDARD_DAILY_CAP) {
+            basicCost = STANDARD_DAILY_CAP;
+        }
     }
+
+    //Sunday cap test
+    if (isSunday == TRUE) {
+        if (basicCost > SUNDAY_CAP) {
+            basicCost = SUNDAY_CAP;
+        }
+    }
+
+    return basicCost;
 }
 
 
