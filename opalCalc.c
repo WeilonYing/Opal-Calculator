@@ -32,10 +32,10 @@
 #define PENSIONER_DAILY_CAP 2.50
 #define SUNDAY_CAP 2.50
 
-#define TRAIN 0
-#define BUS 1
-#define FERRY 2
-#define LIGHTRAIL 3
+#define TRAIN 1
+#define BUS 2
+#define FERRY 3
+#define LIGHTRAIL 4
 
 #define SYDNEY_FERRIES 0
 #define STOCKTON_FERRY 1
@@ -73,13 +73,13 @@
 float getFinalCost (void);
 int getConcessionStatus (void);
 int getIsSunday (void);
-float getBasicCost (void)
+float getBasicCost (void);
 float getTravelPlan (void);
 int getTransportMode (void);
 int getIsOffPeak (int transportMode);
 int getTravelDist (int transportMode);
-int calculateCost (int transportMode, int travelDist, int isOffPeak);
-int calculateFinalCost (float basicCost, int concessionStatus, int isSunday);
+float calculateCost (int transportMode, int travelDist, int isOffPeak);
+float calculateFinalCost (float basicCost, int concessionStatus, int isSunday);
 /* END DECLARATION OF FUNCTIONS */
 
 int main (int argc, char * argv[]) {
@@ -93,7 +93,7 @@ int main (int argc, char * argv[]) {
 
 float getFinalCost (void) { //Master function
 	float finalCost = 0; //Initialise final cost (return) variable
-    ]
+
     //Initialise calculation variables
     int concessionStatus = NOT_CONCESSION; //Initialise as 0, to minimise error risk.
     int isSunday = FALSE; //Initialise as 0 to minimise error risk.
@@ -110,7 +110,7 @@ float getFinalCost (void) { //Master function
     
 	finalCost = 10; //temporary setting to test main function.
     
-    finalCost = calculateFinalCost (basicCost);
+    finalCost = calculateFinalCost (basicCost, concessionStatus, isSunday);
 
 	return finalCost;
 }
@@ -124,7 +124,7 @@ int getConcessionStatus (void) {
     printf ("2 if you are using a pensioner card.\n");
     printf ("Entering a value other than 0, 1 or 2 will crash the program.\n\n");
     
-    scanf ("%d", &inputConcessionStatus);inputGetIsSunday
+    scanf ("%d", &inputConcessionStatus);
     
     assert (inputConcessionStatus >= NOT_CONCESSION);
     assert (inputConcessionStatus <= PENSIONER_CONCESSION);
@@ -146,14 +146,14 @@ int getIsSunday (void) {
 
 float getBasicCost (void) {
     float basicCost = 0; //Initialise to 0 to minimise error risk
-    int allTripsEntered = FALSE //Set to true when user confirms all trips entered
+    int allTripsEntered;
     
-    while (allTripsEntered != TRUE) {
+    while (allTripsEntered != FALSE) {
         basicCost += getTravelPlan();
         
         printf ("Would you like to enter a connecting trip to your journey?\n");
         printf ("If yes, please enter 1. Otherwise, enter 0.\n");
-        printf ("Entering a value other than 0 or 1 will crash the program");
+        printf ("Entering a value other than 0 or 1 will crash the program\n\n");
         
         scanf ("%d", &allTripsEntered);
         
@@ -183,9 +183,9 @@ int getTransportMode (void) {
     int inputGetTransportMode = TRAIN; //Initialising to 0 to minimise error risk.
     
     printf ("How will you make your trip?\n");
-    printf ("If travelling by train, enter 0. If by bus, enter 1.");
-    printf ("If by ferry, enter 2. If by light rail, enter 3.\n")
-    printf ("Entering any other value will crash the program.\n");
+    printf ("If travelling by train, enter 1. If by bus, enter 2.");
+    printf ("If by ferry, enter 3. If by light rail, enter 4.\n");
+    printf ("Entering any other value will crash the program.\n\n");
     
     scanf ("%d", &inputGetTransportMode);
     
@@ -203,7 +203,7 @@ int getTravelDist (int transportMode) {
         printf ("4 if 35-65km or 5 if over 65km\n");
         printf ("Entering any other value will crash the program\n");
         
-        scanf ("%d", inputGetTravelDist);
+        scanf ("%d", &inputGetTravelDist);
         
         assert (inputGetTravelDist >= TRAIN_ZONE_1 &&
             inputGetTravelDist <= TRAIN_ZONE_5);
@@ -212,7 +212,7 @@ int getTravelDist (int transportMode) {
         printf ("Enter 1 if 0-3km, 2 if 3-8km or 3 if over 8km\n");
         printf ("Entering any other value will crash the program.\n");
         
-        scanf ("%d", inputGetTravelDist);
+        scanf ("%d", &inputGetTravelDist);
         
         assert (inputGetTravelDist >= BUS_ZONE_1 &&
             inputGetTravelDist <= BUS_ZONE_3);
@@ -230,19 +230,14 @@ int getTravelDist (int transportMode) {
 int getIsOffPeak (int transportMode) {
     int inputGetIsOffPeak = FALSE;
     if (transportMode == TRAIN) {
-        if (isSunday == FALSE) {
-            printf ("You appear to be travelling by train. Great!\n");
-            printf ("Are you going to be travelling in the off-peak period, ");
-            printf ("a Sunday or on a public holiday)?\n");
-            printf ("Enter 1 if you are, or 0 if you're not.\n");
-            printf ("Entering any other value will crash the program.\n");
-            
-            scanf ("%d", inputGetIsOffPeak);
-            assert (inputGetIsOffPeak >= FALSE && inputGetIsOffPeak <= TRUE);
-        }
-        else {
-            getIsOffPeak = TRUE;
-        }
+        printf ("You appear to be travelling by train. Great!\n");
+        printf ("Are you going to be travelling in the off-peak period, ");
+        printf ("a Sunday or on a public holiday)?\n");
+        printf ("Enter 1 if you are, or 0 if you're not.\n");
+        printf ("Entering any other value will crash the program.\n");
+        
+        scanf ("%d", &inputGetIsOffPeak);
+        assert (inputGetIsOffPeak >= FALSE && inputGetIsOffPeak <= TRUE);
     }
     return inputGetIsOffPeak;
 }
