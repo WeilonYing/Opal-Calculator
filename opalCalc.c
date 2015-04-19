@@ -4,70 +4,23 @@
  * BY: Weilon Ying
  * DATE: started on 22nd March 2015
  * DESCRIPTION: Calculates the cost of using public transport in Sydney 
- *	with the Opal Card (TM).
+ *  with the Opal Card (TM).
  *
  * DISCLAIMER: Opal Card and its associated trademarks are intellectual 
  *  property of Transport for NSW and its subsidiaries such as 
  *  Sydney Trains, Ferries and Buses. The author does not claim any 
  *  responsibility for mistakes in the calculation of the 
  *  journey fare (please don't sue me D:).
+ * 
+ * All fares have been obtained from https://www.opal.com.au/en/fares-and-benefits/
+ * as of 19th April 2015.
  */
  
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-
-#define TRUE 1
-#define FALSE 0
-
-#define NOT_CONCESSION 0
-#define CHILD_STUDENT_CONCESSION 1
-#define PENSIONER_CONCESSION 2
-
-#define OFF_PEAK_DISCOUNT 0.7;
-#define CONCESSION_HALF_PRICE 0.5
-
-#define STANDARD_DAILY_CAP 15.00
-#define CONCESSION_DAILY_CAP 7.50
-#define PENSIONER_DAILY_CAP 2.50
-#define SUNDAY_CAP 2.50
-
-#define TRAIN 1
-#define BUS 2
-#define FERRY 3
-#define LIGHTRAIL 4
-
-#define SYDNEY_FERRIES 0
-#define STOCKTON_FERRY 1
-
-#define TRAIN_ZONE_1 1
-#define TRAIN_ZONE_2 2
-#define TRAIN_ZONE_3 3
-#define TRAIN_ZONE_4 4
-#define TRAIN_ZONE_5 5
-#define TRAIN_FARE_1 3.38
-#define TRAIN_FARE_2 4.20
-#define TRAIN_FARE_3 4.82
-#define TRAIN_FARE_4 6.46
-#define TRAIN_FARE_5 8.30
-
-#define BUS_ZONE_1 1
-#define BUS_ZONE_2 2
-#define BUS_ZONE_3 3
-#define BUS_FARE_1 2.10
-#define BUS_FARE_2 3.50
-#define BUS_FARE_3 4.50
-
-#define SYDNEY_FERRY_ZONE_1 1
-#define SYDNEY_FERRY_ZONE_2 2
-#define SYDNEY_FERRY_FARE_1 5.74
-#define SYDNEY_FERRY_FARE_2 7.18
-#define STOCKTON_FERRY_FARE 2.10
-
-#define LIGHTRAIL_ZONE_1 1
-#define LIGHTRAIL_ZONE_2 2
-#define LIGHTRAIL_FARE_1 2.10
-#define LIGHTRAIL_FARE_2 3.50
+#include "opalCalcStandardFunctions.h"
+#include "opalCalcDefinitions.h"
 
 /* BEGIN DECLARATION OF FUNCTIONS */
 float getFinalCost (void);
@@ -80,19 +33,23 @@ int getIsOffPeak (int transportMode);
 int getTravelDist (int transportMode);
 float calculateCost (int transportMode, int travelDist, int isOffPeak);
 float calculateFinalCost (float basicCost, int concessionStatus, int isSunday);
+
 /* END DECLARATION OF FUNCTIONS */
 
 int main (int argc, char * argv[]) {
+
    float costOfJourney = 0;
    
    costOfJourney = getFinalCost();
    
-   printf("The journey of your cost is: %.2f\n", costOfJourney);
+   printf("The cost of your journey is: $%.2f\n\n", costOfJourney);
+
    return EXIT_SUCCESS;
 }
 
 float getFinalCost (void) { //Master function
-	float finalCost = 0; //Initialise final cost (return) variable
+
+    float finalCost = 0; //Initialise final cost (return) variable
 
     //Initialise calculation variables
     int concessionStatus = NOT_CONCESSION; //Initialise as 0, to minimise error risk.
@@ -108,11 +65,11 @@ float getFinalCost (void) { //Master function
     //get value of basicCost
     basicCost = getBasicCost();
     
-	finalCost = 10; //temporary setting to test main function.
+    finalCost = 10; //temporary setting to test main function.
     
     finalCost = calculateFinalCost (basicCost, concessionStatus, isSunday);
 
-	return finalCost;
+    return finalCost;
 }
 
 int getConcessionStatus (void) {
@@ -121,43 +78,50 @@ int getConcessionStatus (void) {
     printf ("Are you using a concession Opal card?\n");
     printf ("Enter 0 if you are not using a concession card, \n");
     printf ("1 if you are using a child or student card and \n");
-    printf ("2 if you are using a pensioner card.\n");
-    printf ("Entering a value other than 0, 1 or 2 will crash the program.\n\n");
+    printf ("2 if you are using a pensioner card.\n\n");
     
-    scanf ("%d", &inputConcessionStatus);
-    
-    assert (inputConcessionStatus >= NOT_CONCESSION);
-    assert (inputConcessionStatus <= PENSIONER_CONCESSION);
+    inputConcessionStatus = getInput (NOT_CONCESSION, PENSIONER_CONCESSION);
+    if (inputConcessionStatus < NOT_CONCESSION || 
+        inputConcessionStatus > PENSIONER_CONCESSION) {
+
+        reportProgramError ("GCS_ICS");
+    }
     
     return inputConcessionStatus;
 }
 
 int getIsSunday (void) {
+
     int inputGetIsSunday = FALSE; //Initialising to 0 minimise error risk
-    printf ("Are you travelling on a Sunday? Enter 1 if you are, otherwise, enter 0.\n");
-    printf ("Entering a value other than 0 or 1 will crash the program.\n\n");
+    printf ("Are you travelling on a Sunday? "
+        "Enter 1 if you are, otherwise, enter 0.\n\n");
     
-    scanf("%d", &inputGetIsSunday);
+    getInput (FALSE, TRUE);
     
-    assert (inputGetIsSunday == FALSE || inputGetIsSunday == TRUE);
+    if (inputGetIsSunday < FALSE || inputGetIsSunday > TRUE) {
+
+        reportProgramError ("GIS_IGS");
+    }
     
     return inputGetIsSunday;
 }
 
 float getBasicCost (void) {
+
     float basicCost = 0; //Initialise to 0 to minimise error risk
-    int allTripsEntered;
+    int addConnectingTrip = TRUE;
     
-    while (allTripsEntered != FALSE) {
+    while (addConnectingTrip != FALSE) {
         basicCost += getTravelPlan();
         
         printf ("Would you like to enter a connecting trip to your journey?\n");
-        printf ("If yes, please enter 1. Otherwise, enter 0.\n");
-        printf ("Entering a value other than 0 or 1 will crash the program\n\n");
+        printf ("If yes, please enter 1. Otherwise, enter 0.\n\n");
         
-        scanf ("%d", &allTripsEntered);
+        addConnectingTrip = getInput (FALSE, TRUE);
         
-        assert (allTripsEntered == TRUE || allTripsEntered == FALSE);
+        if (addConnectingTrip < FALSE || addConnectingTrip > TRUE) {
+            reportProgramError ("GBC_ACT");
+        }
     }
     
     return basicCost;
@@ -165,7 +129,7 @@ float getBasicCost (void) {
 
 float getTravelPlan (void) {
     /* Declaration of variables */
-    int transportMode; //Train (0), bus (1) or ferry
+    int transportMode; //Train (0), bus (1), ferry (2) or light rail (3)
     int travelDist; //The distance of the trip (this affects cost)
     int isOffPeak = FALSE; //Only used for train services. Initialised to true;
     float cost = 0; //Holds the cost of the trip. Set to 0 to minimise error risk.
@@ -183,69 +147,139 @@ int getTransportMode (void) {
     int inputGetTransportMode = TRAIN; //Initialising to 0 to minimise error risk.
     
     printf ("How will you make your trip?\n");
-    printf ("If travelling by train, enter 1. If by bus, enter 2.");
-    printf ("If by ferry, enter 3. If by light rail, enter 4.\n");
-    printf ("Entering any other value will crash the program.\n\n");
+    printf ("If travelling by train, enter %d. If by bus, enter %d. \n"
+        "If by ferry, enter %d. If by light rail, enter %d.\n\n", 
+        TRAIN, BUS, FERRY, LIGHTRAIL);
+
+    inputGetTransportMode = getInput (TRAIN, LIGHTRAIL);
     
-    scanf ("%d", &inputGetTransportMode);
-    
-    assert (inputGetTransportMode >= TRAIN && inputGetTransportMode <= LIGHTRAIL);
+    if (inputGetTransportMode < TRAIN || inputGetTransportMode > LIGHTRAIL) {
+        reportProgramError ("GTM_IGTM");
+    }
     
     return inputGetTransportMode;
 }
 
 int getTravelDist (int transportMode) {
-    int inputGetTravelDist;
+    int inputGetTravelDist = NO_INPUT;
 
     if (transportMode == TRAIN) {
+
         printf ("How far is your train trip?\n");
-        printf ("Enter 1 if 0-10km, 2 if 10-20km, 3 if 20-35km, ");
-        printf ("4 if 35-65km or 5 if over 65km\n");
-        printf ("Entering any other value will crash the program\n");
+        printf ("Enter %d if 0-10km, %d if 10-20km, %d if 20-35km, "
+        "%d if 35-65km or %d if over 65km\n\n", 
+        TRAIN_ZONE_1, TRAIN_ZONE_2, TRAIN_ZONE_3, TRAIN_ZONE_4, TRAIN_ZONE_5);
         
-        scanf ("%d", &inputGetTravelDist);
+        inputGetTravelDist = getInput (TRAIN_ZONE_1, TRAIN_ZONE_5);
+
+        if (inputGetTravelDist < TRAIN_ZONE_1 ||
+            inputGetTravelDist > TRAIN_ZONE_5) {
+
+            reportProgramError ("GTD_TRAIN");
+        }
         
-        assert (inputGetTravelDist >= TRAIN_ZONE_1 &&
-            inputGetTravelDist <= TRAIN_ZONE_5);
     } else if (transportMode == BUS) {
+
         printf ("How far is your train trip?\n");
-        printf ("Enter 1 if 0-3km, 2 if 3-8km or 3 if over 8km\n");
-        printf ("Entering any other value will crash the program.\n");
+        printf ("Enter %d if 0-3km, %d if 3-8km or %d if over 8km\n\n",
+            BUS_ZONE_1, BUS_ZONE_2, BUS_ZONE_3);
         
-        scanf ("%d", &inputGetTravelDist);
+        getInput (BUS_ZONE_1, BUS_ZONE_3);
         
-        assert (inputGetTravelDist >= BUS_ZONE_1 &&
-            inputGetTravelDist <= BUS_ZONE_3);
+        if (inputGetTravelDist < BUS_ZONE_1 ||
+            inputGetTravelDist > BUS_ZONE_3) {
+
+            reportProgramError ("GTD_BUS");
+        }
+
     } else if (transportMode == FERRY) {
+
+        int ferryCompany;
+
+        printf ("Are you using Sydney Ferries or the Stockton Ferry?\n");
+        printf ("Enter %d if you're using Sydney Ferries, "
+            "and %d if you're using Stockton.\n\n", 
+            SYDNEY_FERRIES, STOCKTON_FERRY);
         
+        ferryCompany = getInput (SYDNEY_FERRIES, STOCKTON_FERRY);
+        
+        if (ferryCompany < SYDNEY_FERRIES || ferryCompany > STOCKTON_FERRY) {
+
+            reportProgramError ("GTD_FERRYCOMP");
+        }
+        
+        if (ferryCompany == SYDNEY_FERRIES) {
+
+            printf ("How far is your ferry trip?\n");
+            printf ("Enter %d if 0-9km or %d if over 9km.\n\n", 
+                SYDNEY_FERRY_ZONE_1, SYDNEY_FERRY_ZONE_2);
+
+            inputGetTravelDist = getInput (SYDNEY_FERRY_ZONE_1, SYDNEY_FERRY_ZONE_2);
+        } else if (ferryCompany == STOCKTON_FERRY) {
+
+            inputGetTravelDist = STOCKTON_FERRY_ZONE;
+        } else {
+
+            reportProgramError ("GTD_FERRYCOMP");
+        }
+
+        if (inputGetTravelDist < SYDNEY_FERRY_ZONE_1 ||
+            inputGetTravelDist > STOCKTON_FERRY_ZONE) {
+
+            reportProgramError ("GTD_FERRY");
+        }
+
     } else if (transportMode == LIGHTRAIL) {
-        
+
+        printf ("How far is your light rail trip?\n");
+        printf ("Enter %d if 0-3km or %d "
+            "if over 3km.\n\n", LIGHTRAIL_ZONE_1, LIGHTRAIL_ZONE_2);
+
+        inputGetTravelDist = getInput (LIGHTRAIL_ZONE_1, LIGHTRAIL_ZONE_2);
+
+        if (inputGetTravelDist < LIGHTRAIL_ZONE_1 || 
+            inputGetTravelDist > LIGHTRAIL_ZONE_2) {
+
+            reportProgramError ("GTD_LIGHT");
+        }
+
     } else {
-        printf ("Oops. Something broke. Please panic and yell at ");
-        printf ("the developer ASAP.\n");
+
+        reportProgramError ("GTD_TRANS");
     }
     
     return inputGetTravelDist;
 }
 int getIsOffPeak (int transportMode) {
+
     int inputGetIsOffPeak = FALSE;
+
     if (transportMode == TRAIN) {
+
         printf ("You appear to be travelling by train. Great!\n");
         printf ("Are you going to be travelling in the off-peak period, ");
         printf ("a Sunday or on a public holiday)?\n");
-        printf ("Enter 1 if you are, or 0 if you're not.\n");
-        printf ("Entering any other value will crash the program.\n");
+        printf ("Enter %d if you are, or %d if you're not.\n\n",
+            TRUE, FALSE);
         
-        scanf ("%d", &inputGetIsOffPeak);
-        assert (inputGetIsOffPeak >= FALSE && inputGetIsOffPeak <= TRUE);
+        inputGetIsOffPeak = getInput (FALSE, TRUE);
+        if (inputGetIsOffPeak < FALSE || inputGetIsOffPeak > TRUE) {
+
+            reportProgramError ("GIOP_I");
+        }
     }
     return inputGetIsOffPeak;
 }
 
 float calculateCost (int transportMode, int travelDist, int isOffPeak) {
+    //Calculates the user's cost for a single trip.
+
     float calculateCostResult = 0;
+
     if (transportMode == TRAIN) {
+
         if (travelDist == TRAIN_ZONE_1) {
+
             calculateCostResult = TRAIN_FARE_1;
         } else if (travelDist == TRAIN_ZONE_2) {
             calculateCostResult = TRAIN_FARE_2;
@@ -255,52 +289,57 @@ float calculateCost (int transportMode, int travelDist, int isOffPeak) {
             calculateCostResult = TRAIN_FARE_4;
         } else if (travelDist == TRAIN_ZONE_5) {
             calculateCostResult = TRAIN_FARE_5;
+        } else {
+            reportProgramError ("CC_DIST_TRAIN");
         }
         
         if (isOffPeak == TRUE) {
             calculateCostResult = calculateCostResult * OFF_PEAK_DISCOUNT;
         }
     } else if (transportMode == BUS) {
+
         if (travelDist == BUS_ZONE_1) {
             calculateCostResult = BUS_FARE_1;
         } else if (travelDist == BUS_ZONE_2) {
             calculateCostResult = BUS_FARE_2;
         } else if (travelDist == BUS_ZONE_3) {
             calculateCostResult = BUS_FARE_3;
+        } else {
+            reportProgramError ("CC_DIST_BUS");
         }
+
     } else if (transportMode == FERRY) {
-        int ferryCompany;
-        printf ("Are you using Sydney Ferries or the Stockton Ferry?\n");
-        printf ("Enter 0 if you're using Sydney Ferries, and 1 if you're using Stockton.\n");
-        printf ("Entering a value other than 0 or 1 will crash the program.\n");
-        
-        scanf ("%d", &ferryCompany);
-        
-        assert (ferryCompany >= SYDNEY_FERRIES && ferryCompany <= STOCKTON_FERRY);
-        
-        if (ferryCompany == SYDNEY_FERRIES) {
-            if (travelDist == SYDNEY_FERRY_ZONE_1) {
-                calculateCostResult = SYDNEY_FERRY_FARE_1;
-            } else if (travelDist == SYDNEY_FERRY_ZONE_2) {
-                calculateCostResult = SYDNEY_FERRY_FARE_2;
-            }
-        } else if (ferryCompany == STOCKTON_FERRY) {
+
+        if (travelDist == SYDNEY_FERRY_ZONE_1) {
+            calculateCostResult = SYDNEY_FERRY_FARE_1;
+        } else if (travelDist == SYDNEY_FERRY_ZONE_2) {
+            calculateCostResult = SYDNEY_FERRY_FARE_2;
+        } else if (travelDist == STOCKTON_FERRY_ZONE) {
             calculateCostResult = STOCKTON_FERRY_FARE;
+        } else {
+            reportProgramError ("CC_DIST_FERRY");
         }
+
     } else if (transportMode == LIGHTRAIL) {
+
         if (travelDist == LIGHTRAIL_ZONE_1) {
             calculateCostResult = LIGHTRAIL_FARE_1;
         } else if (travelDist == LIGHTRAIL_ZONE_2) {
             calculateCostResult = LIGHTRAIL_FARE_2;
+        } else {
+            reportProgramError ("CC_DIST_LIGHT");
         }
+
     } else {
-        printf ("You broke the program. Please let the developer know.");
+        reportProgramError ("CC_TRANS");
     }
     
     return calculateCostResult;
 }
 
 float calculateFinalCost (float basicCost, int concessionStatus, int isSunday) {
+    //Calculates the user's final fare cost.
+
     //Normal concession discount test
     if (concessionStatus > NOT_CONCESSION) {
         basicCost = basicCost * CONCESSION_HALF_PRICE;
@@ -308,16 +347,21 @@ float calculateFinalCost (float basicCost, int concessionStatus, int isSunday) {
 
     //Daily cap test
     if (concessionStatus > NOT_CONCESSION) {
+
         if (concessionStatus == PENSIONER_CONCESSION) {
+
             if (basicCost > PENSIONER_DAILY_CAP) {
-                basicCost = PENSIONER_DAILY_CAP;
+                basicCost = PENSIONER_DAILY_CAP; //max fare is $2.50, and so on.
             }
         } else {
+
             if (basicCost > CONCESSION_DAILY_CAP) {
                 basicCost = CONCESSION_DAILY_CAP;
             }
+
         }
     } else {
+
         if (basicCost > STANDARD_DAILY_CAP) {
             basicCost = STANDARD_DAILY_CAP;
         }
@@ -325,6 +369,7 @@ float calculateFinalCost (float basicCost, int concessionStatus, int isSunday) {
 
     //Sunday cap test
     if (isSunday == TRUE) {
+
         if (basicCost > SUNDAY_CAP) {
             basicCost = SUNDAY_CAP;
         }
@@ -332,11 +377,3 @@ float calculateFinalCost (float basicCost, int concessionStatus, int isSunday) {
 
     return basicCost;
 }
-
-
-
-
-
-
-
-
