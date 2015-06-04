@@ -1,0 +1,11 @@
+Pseudocode
+
+int getInput (int minimum, int maximum) {
+    int input;
+    get input from user (.e.g scanf);
+    while (input is not between minimum and maximum) {
+        print ("You entered an invalid number. Please enter a number \
+            between <minimum> and <maximum>.\n", minimum, maximum);
+    }
+    return input;
+}
