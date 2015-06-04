@@ -68,5 +68,9 @@
 #define LIGHTRAIL_FARE_1 2.10
 #define LIGHTRAIL_FARE_2 3.50
 
+<<<<<<< HEAD
 #define NO_INPUT -1 //If there is no input yet, set to -1 first.
 #define MAX_TRIPS 3 //Maximum trips per journey is 3.
+=======
+#define NO_INPUT -1 //If there is no input yet, set to -1 first.
+>>>>>>> origin/master

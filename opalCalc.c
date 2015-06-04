@@ -13,7 +13,11 @@
  *  journey fare (please don't sue me D:).
  * 
  * All fares have been obtained from https://www.opal.com.au/en/fares-and-benefits/
+<<<<<<< HEAD
  * as of 4th June 2015.
+=======
+ * as of 19th April 2015.
+>>>>>>> origin/master
  */
  
 #include <stdio.h>
@@ -39,6 +43,7 @@ float calculateFinalCost (float basicCost, int concessionStatus, int isSunday);
 /* END DECLARATION OF FUNCTIONS */
 
 int main (int argc, char * argv[]) {
+<<<<<<< HEAD
     printWelcomeMessage();
 
     float costOfJourney = 0;
@@ -69,6 +74,16 @@ void printWelcomeMessage() {
     printf ("Opal is a trademark owned by Transport for NSW.\n\n");
 
 
+=======
+
+   float costOfJourney = 0;
+   
+   costOfJourney = getFinalCost();
+   
+   printf("The cost of your journey is: $%.2f\n\n", costOfJourney);
+
+   return EXIT_SUCCESS;
+>>>>>>> origin/master
 }
 
 float getFinalCost (void) { //Master function
@@ -134,7 +149,10 @@ float getBasicCost (void) {
 
     float basicCost = 0; //Initialise to 0 to minimise error risk
     int addConnectingTrip = TRUE;
+<<<<<<< HEAD
     int numTrips = 0;
+=======
+>>>>>>> origin/master
     
     while (addConnectingTrip != FALSE) {
         basicCost += getTravelPlan();
@@ -162,7 +180,18 @@ float getBasicCost (void) {
                 "which is the maximum allowed (%d).\n\n", numTrips, MAX_TRIPS);
         }
         
+<<<<<<< HEAD
         
+=======
+        printf ("Would you like to enter a connecting trip to your journey?\n");
+        printf ("If yes, please enter 1. Otherwise, enter 0.\n\n");
+        
+        addConnectingTrip = getInput (FALSE, TRUE);
+        
+        if (addConnectingTrip < FALSE || addConnectingTrip > TRUE) {
+            reportProgramError ("GBC_ACT");
+        }
+>>>>>>> origin/master
     }
     
     return basicCost;
@@ -221,11 +250,19 @@ int getTravelDist (int transportMode) {
         
     } else if (transportMode == BUS) {
 
+<<<<<<< HEAD
         printf ("How far is your bus trip?\n");
         printf ("Enter %d if 0-3km, %d if 3-8km or %d if over 8km\n\n",
             BUS_ZONE_1, BUS_ZONE_2, BUS_ZONE_3);
         
         inputGetTravelDist = getInput (BUS_ZONE_1, BUS_ZONE_3);
+=======
+        printf ("How far is your train trip?\n");
+        printf ("Enter %d if 0-3km, %d if 3-8km or %d if over 8km\n\n",
+            BUS_ZONE_1, BUS_ZONE_2, BUS_ZONE_3);
+        
+        getInput (BUS_ZONE_1, BUS_ZONE_3);
+>>>>>>> origin/master
         
         if (inputGetTravelDist < BUS_ZONE_1 ||
             inputGetTravelDist > BUS_ZONE_3) {
@@ -298,9 +335,14 @@ int getIsOffPeak (int transportMode) {
     if (transportMode == TRAIN) {
 
         printf ("You appear to be travelling by train. Great!\n");
+<<<<<<< HEAD
         printf ("Are you going to be travelling in the off-peak period?\n");
         printf ("(Off-peak period is anytime that is not 7-9am or 4-6:30pm\n");
         printf ("for Sydney Trains and 6-8am and 4-6:30pm for NSW TrainLink)\n");
+=======
+        printf ("Are you going to be travelling in the off-peak period, ");
+        printf ("a Sunday or on a public holiday)?\n");
+>>>>>>> origin/master
         printf ("Enter %d if you are, or %d if you're not.\n\n",
             TRUE, FALSE);
         
